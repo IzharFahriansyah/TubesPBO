@@ -5,6 +5,12 @@
  */
 package tubespbo.View;
 
+import JDBC.sqlConnector;
+import java.sql.*;
+import javax.swing.DefaultListModel;
+import javax.swing.JOptionPane;
+import javax.swing.event.ListSelectionEvent;
+
 /**
  *
  * @author N4NRC
@@ -16,6 +22,7 @@ public class Riwayat_Transaksi extends javax.swing.JFrame {
      */
     public Riwayat_Transaksi() {
         initComponents();
+        loadDonasiData();
     }
 
     /**
@@ -31,8 +38,8 @@ public class Riwayat_Transaksi extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         jList1 = new javax.swing.JList<>();
         jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
-        jLabel3 = new javax.swing.JLabel();
+        jLabelInstansi = new javax.swing.JLabel();
+        jLabelPrice = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
 
@@ -43,14 +50,19 @@ public class Riwayat_Transaksi extends javax.swing.JFrame {
             public int getSize() { return strings.length; }
             public String getElementAt(int i) { return strings[i]; }
         });
+        jList1.addListSelectionListener(new javax.swing.event.ListSelectionListener() {
+            public void valueChanged(javax.swing.event.ListSelectionEvent evt) {
+                jList1ValueChanged(evt);
+            }
+        });
         jScrollPane1.setViewportView(jList1);
 
         jLabel1.setFont(new java.awt.Font("Tahoma", 0, 18)); // NOI18N
         jLabel1.setText("Riwayat Transaksi");
 
-        jLabel2.setText("Nama Donasi :");
+        jLabelInstansi.setText("Nama Donasi :");
 
-        jLabel3.setText("Donasi :");
+        jLabelPrice.setText("Donasi :");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -63,8 +75,8 @@ public class Riwayat_Transaksi extends javax.swing.JFrame {
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 270, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel2)
-                    .addComponent(jLabel3))
+                    .addComponent(jLabelInstansi)
+                    .addComponent(jLabelPrice))
                 .addContainerGap(82, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
@@ -76,9 +88,9 @@ public class Riwayat_Transaksi extends javax.swing.JFrame {
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 350, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(jPanel1Layout.createSequentialGroup()
-                        .addComponent(jLabel2)
+                        .addComponent(jLabelInstansi)
                         .addGap(34, 34, 34)
-                        .addComponent(jLabel3)))
+                        .addComponent(jLabelPrice)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -100,9 +112,44 @@ public class Riwayat_Transaksi extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void jList1ValueChanged(javax.swing.event.ListSelectionEvent evt) {//GEN-FIRST:event_jList1ValueChanged
+        // TODO add your handling code here:
+           if (!evt.getValueIsAdjusting()) {
+            String selectedValue = jList1.getSelectedValue();
+            if (selectedValue != null) {
+                String[] parts = selectedValue.split(", ");
+                String pricePart = parts[1];
+                String instansiPart = parts[0];
+
+                jLabelPrice.setText("Price: " + pricePart.split(": ")[1]);
+                jLabelInstansi.setText("Instansi: " + instansiPart.split(": ")[1]);
+            }
+        }
+    }//GEN-LAST:event_jList1ValueChanged
+
     /**
      * @param args the command line arguments
      */
+    
+     private void loadDonasiData() {
+        DefaultListModel<String> listModel = new DefaultListModel<>();
+
+        String query = "SELECT price, instansi, history FROM donasi";
+        try (Connection conn = sqlConnector.connectdb(); 
+                Statement stmt = conn.createStatement(); 
+                ResultSet rs = stmt.executeQuery(query)) {
+            while (rs.next()) {
+                int price = rs.getInt("price");
+                String instansi = rs.getString("instansi");
+                String history = rs.getString("history");
+                listModel.addElement("Instansi: " + instansi + ", Price: " + price + ", History: " + history);
+            }
+            jList1.setModel(listModel);
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Database error: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -137,8 +184,8 @@ public class Riwayat_Transaksi extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
-    private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabelInstansi;
+    private javax.swing.JLabel jLabelPrice;
     private javax.swing.JList<String> jList1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JScrollPane jScrollPane1;
