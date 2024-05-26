@@ -5,6 +5,8 @@
  */
 package tubespbo;
 
+import tubespbo.View.Registrasi;
+
 /**
  *
  * @author fauzan
